@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# 会话启动钩子 - ccpowers 插件
+
+set -euo pipefail
+
+# 确定插件根目录
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# 读取 using-ccpowers 技能内容
+using_ccpowers_content=$(cat "${PLUGIN_ROOT}/skills/using-ccpowers/SKILL.md" 2>&1 || echo "读取 using-ccpowers 技能失败")
+
+# 为 JSON 嵌入转义字符串
+escape_for_json() {
+    local s="$1"
+    s="${s//\\/\\\\}"
+    s="${s//\"/\\\"}"
+    s="${s//$'\n'/\\n}"
+    s="${s//$'\r'/\\r}"
+    s="${s//$'\t'/\\t}"
+    printf '%s' "$s"
+}
+
+using_ccpowers_escaped=$(escape_for_json "$using_ccpowers_content")
+session_context="<EXTREMELY_IMPORTANT>\n你拥有超能力。\n\n**以下是 'ccpowers:using-ccpowers' 技能的完整内容 - 你的技能使用入门指南。其他技能请使用 Skill 工具调用：**\n\n${using_ccpowers_escaped}\n\n</EXTREMELY_IMPORTANT>"
+
+# 输出上下文注入为 JSON
+# Claude Code 使用 hookSpecificOutput.additionalContext（嵌套格式）
+if [ -n "${CLAUDE_PLUGIN_ROOT:-}" ] && [ -z "${COPILOT_CLI:-}" ]; then
+  printf '{\n  "hookSpecificOutput": {\n    "hookEventName": "SessionStart",\n    "additionalContext": "%s"\n  }\n}\n' "$session_context"
+else
+  printf '{\n  "additionalContext": "%s"\n}\n' "$session_context"
+fi
+
+exit 0
