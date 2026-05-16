@@ -1,7 +1,7 @@
 {
   "name": "ccpowers",
   "description": "Claude Code 核心技能库：TDD、调试、协作模式与最佳实践（中文版）",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "chenaojun"
   },
