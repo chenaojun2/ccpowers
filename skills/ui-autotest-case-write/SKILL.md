@@ -1,119 +1,113 @@
 ---
-name: ui-autotest
-description: 需要运行、管理或分析 UI 自动化测试时使用 - 执行浏览器或应用界面测试、生成报告、分析失败原因、管理测试环境
+name: ui-autotest-case-write
+description: 需要为 Android 应用编写或维护 UI 自动化测试用例脚本时使用 - 基于 MidsceneJS Android 方案生成可执行脚本、断言和数据提取流程
 ---
 
-# UI 自动化测试
+# UI 自动化测试用例编写
 
 ## 概述
 
-统一的 UI 自动化测试能力接口。提供浏览器或应用界面测试的运行、结果分析、报告生成和测试环境管理。
+为 Android 应用编写 MidsceneJS UI 自动化测试脚本。重点是把用户流程拆成稳定、可读、可回放的脚本步骤，并使用 Midscene 的视觉驱动能力降低选择器维护成本。
 
-**核心原则：** 自动检测项目使用的 UI 测试框架，以统一的方式执行和报告界面测试结果。
+默认方案：MidsceneJS Android（`@midscene/android`）。
 
-**此技能为能力预留接口，等待接入具体的 UI 自动化测试服务或工具。**
+参考文档：https://midscenejs.com/zh/android-getting-started
 
 ## 何时使用
 
-**使用场景：**
-- 需要运行 Playwright、Cypress、Selenium、Appium 等 UI 自动化测试
-- 需要验证页面或应用界面交互流程
-- 需要生成 UI 测试报告、截图、录屏或 trace
-- 需要分析 UI 测试失败原因
-- 需要管理浏览器、模拟器、测试账号、mock 服务等测试环境
-- CI/CD 流程中的 UI 回归测试阶段
+- 需要新增 Android UI 自动化测试用例
+- 需要把手工测试步骤转成可执行脚本
+- 需要为登录、注册、搜索、下单、设置等界面流程编写断言
+- 需要从界面提取结构化数据用于校验
+- 需要维护已有 Midscene Android 脚本
 
-**不使用场景：**
-- 编写单个测试用例（使用 ccpowers:test-driven-development）
-- 调试非 UI 自动化测试失败（使用 ccpowers:systematic-debugging）
+不用于执行和诊断测试运行结果；执行脚本时使用 `ccpowers:ui-autotest-start`。
 
-## 能力接口
+## 编写流程
 
-### 1. UI 测试发现
+1. 明确测试目标：应用入口、前置账号、设备状态、核心路径、预期结果。
+2. 检查项目结构：优先复用已有测试目录、脚本命名、包管理器和 npm script。
+3. 确认依赖：需要 `@midscene/android`、`dotenv`，TypeScript 脚本通常还需要 `tsx`。
+4. 确定保存路径：优先使用项目已有 UI 自动化测试目录；没有时创建 `tests/ui-autotest/<业务域>/<用例名>.ts`。
+5. 编写脚本：使用 `AndroidDevice` 连接设备，使用 `AndroidAgent` 执行视觉驱动操作。
+6. 加入稳定断言：关键页面使用 `aiWaitFor` 等待，再用 `aiAssert` 校验结果。
+7. 输出可诊断信息：必要时用 `aiQuery` 提取界面数据并打印。
 
-```
-TODO：接入 UI 自动化测试发现服务
-- 自动检测项目使用的 UI 测试框架
-- 扫描项目中的 UI 测试文件
-- 构建页面、场景、用例索引
-- 支持按浏览器、设备、标签、模块、目录过滤
-```
+## 保存路径
 
-### 2. UI 测试执行
+默认保存到：
 
-```
-TODO：接入 UI 自动化测试执行引擎
-- 支持浏览器、移动模拟器或真实设备执行
-- 支持指定测试范围（全量、增量、指定文件、指定场景）
-- 支持无头/有头模式、截图、录屏、trace
-- 超时控制、重试策略与资源限制
-- 实时进度报告
+```text
+tests/ui-autotest/<业务域>/<用例名>.ts
 ```
 
-### 3. 结果分析
+路径规则：
 
-```
-TODO：接入 UI 自动化测试结果分析服务
-- 测试通过/失败/跳过统计
-- 失败测试的根因分类（选择器失效、等待超时、网络异常、断言失败）
-- 测试执行时间分析
-- 不稳定测试（flaky test）检测
-```
+- `<业务域>` 使用英文 kebab-case，例如 `login`、`checkout`、`settings`。
+- `<用例名>` 使用英文 kebab-case，描述核心流程，例如 `login-with-password.ts`。
+- 如果项目已有 UI 自动化目录，优先沿用已有目录结构，例如 `e2e/`、`tests/e2e/`、`ui-tests/`。
+- 如果同一业务域有多个用例，把共享帮助函数放到 `tests/ui-autotest/<业务域>/helpers.ts`。
+- 不把临时调试脚本放进正式用例目录；临时脚本使用 `tmp/ui-autotest/`。
 
-### 4. UI 测试报告
+## 推荐脚本骨架
 
-```
-TODO：接入 UI 自动化测试报告工具
-- HTML 报告、截图、录屏、trace 归档
-- 失败步骤与 DOM 状态摘要
-- 跨浏览器、跨设备结果对比
-- 与变更差异关联的 UI 回归风险提示
-```
+```ts
+import 'dotenv/config';
+import {
+  AndroidAgent,
+  AndroidDevice,
+  getConnectedDevices,
+} from '@midscene/android';
 
-### 5. 测试环境管理
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-```
-TODO：接入 UI 自动化测试环境管理服务
-- 浏览器、驱动、模拟器或设备管理
-- 测试账号、测试数据、Mock 服务启动与管理
-- 测试固件（fixture）管理
-- 环境隔离与并行支持
-```
+async function main() {
+  const devices = await getConnectedDevices();
+  if (devices.length === 0) {
+    throw new Error('未发现 Android 设备，请先确认 adb devices -l 有可用设备');
+  }
 
-## 当前回退行为
+  const device = new AndroidDevice(devices[0].udid);
+  const agent = new AndroidAgent(device, {
+    aiActionContext:
+      '如果出现权限、定位、用户协议等弹窗，点击同意；如果出现登录页但本用例不需要登录，关闭登录页。',
+  });
 
-在具体 UI 自动化测试服务接入之前，此技能提供基础的框架检测和命令行执行：
+  await device.connect();
 
-```bash
-# 自动检测并执行 UI 自动化测试
-if [ -f package.json ]; then
-    # 检测常见 UI 自动化测试框架
-    if grep -q '"@playwright/test"' package.json; then
-        npx playwright test
-    elif grep -q '"cypress"' package.json; then
-        npx cypress run
-    elif grep -q '"selenium-webdriver"' package.json; then
-        npm test
-    else
-        npm test
-    fi
-fi
+  await agent.aiAct('打开目标应用或页面');
+  await sleep(1000);
+  await agent.aiWaitFor('目标页面已经展示');
+  await agent.aiAct('完成用户操作');
+  await agent.aiAssert('界面展示了预期结果');
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
 ```
 
-## 扩展指南
+## Midscene 方法选择
 
-要接入自定义 UI 自动化测试服务，需要实现以下接口：
+- `aiAct`：描述用户操作，让 Midscene 自动规划步骤。
+- `aiTap`：需要直接点击明确目标时使用。
+- `aiWaitFor`：等待页面状态稳定，不用固定 sleep 替代关键等待。
+- `aiAssert`：验证界面是否满足预期。
+- `aiQuery`：从界面提取结构化 JSON 数据。
+- `aiBoolean` / `aiNumber` / `aiString`：提取简单类型结果。
 
-1. **UI 测试发现器（UITestDiscoverer）：** 返回项目中所有 UI 测试用例的列表
-2. **UI 测试执行器（UITestRunner）：** 接受 UI 测试用例列表并执行，返回结果
-3. **结果报告器（ResultReporter）：** 将原始测试结果、截图、录屏和 trace 格式化为可读报告
-4. **环境管理器（EnvironmentManager）：** 管理浏览器、模拟器、测试账号和依赖服务
+## 编写准则
 
-每个接口独立实现，可按需组合。
+- 用用户能理解的自然语言描述界面目标，不写脆弱坐标。
+- 每个脚本聚焦一个业务流程，避免把多个无关路径塞进同一个用例。
+- 在关键状态变化后先等待，再断言。
+- 不把 API Key、账号密码、设备 ID 写死到脚本里；使用 `.env` 或测试配置。
+- 对弹窗、权限、登录态等不稳定因素写入 `aiActionContext`。
+- 输出报告路径、关键查询结果和失败上下文，方便执行技能继续诊断。
 
 ## 与其他技能的集成
 
-- **ccpowers:test-driven-development** — TDD 流程中调用此技能执行 UI 自动化测试
-- **ccpowers:verification-before-completion** — 完成声明前调用此技能验证测试通过
-- **ccpowers:systematic-debugging** — 调试阶段调用此技能复现问题
-- **ccpowers:subagent-driven-development** — 子代理在实施后调用此技能验证
+- **ccpowers:ui-autotest-start** — 执行脚本、检查设备连接、查看报告和诊断失败
+- **ccpowers:test-driven-development** — 为待测代码设计测试行为时使用
+- **ccpowers:systematic-debugging** — 自动化失败需要根因分析时使用

@@ -23,8 +23,8 @@ ccpowers 是一个面向 Claude Code 的中文核心技能库插件。它提供�
 | 完成验证 | 证据先于声明 |
 | 完成开发分支 | 合并/PR/清理工作流 |
 | 使用git工作树 | 隔离工作区管理 |
-| ui-autotest-case-write | UI 自动化测试case脚本编写 |
-| ui-autotest-start | UI 自动化测试脚本执行 |
+| ui-autotest-case-write | 基于 MidsceneJS Android 编写 UI 自动化测试用例脚本 |
+| ui-autotest-start | 执行 MidsceneJS Android UI 自动化测试脚本 |
 
 ## 目录结构
 

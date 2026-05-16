@@ -38,8 +38,9 @@ claude plugin add ./ccpowers
 - **使用git工作树** — 隔离工作区管理
 - **完成开发分支** — 合并、PR、清理的结构化工作流
 
-### 预留接口
-- **ui-autotest** — UI 自动化测试执行与管理的能力接口，等待接入具体服务
+### UI 自动化测试
+- **ui-autotest-case-write** — 基于 MidsceneJS Android 编写 UI 自动化测试用例脚本
+- **ui-autotest-start** — 执行 MidsceneJS Android UI 自动化测试脚本并诊断失败
 
 ## 工作原理
 
