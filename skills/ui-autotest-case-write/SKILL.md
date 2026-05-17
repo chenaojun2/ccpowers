@@ -29,7 +29,7 @@ description: 需要为 Android 应用新增或维护 MidsceneJS UI 自动化测�
 2. 检查项目结构：优先复用 `tests/ui-autotest/`、现有脚本命名、包管理器和 npm script。
 3. 读取 `tests/ui-autotest/.env` 的配置约定，不把模型配置、设备 ID、包名写死到脚本。
 4. 确认依赖：需要 `@midscene/android`、`dotenv`，TypeScript 脚本通常还需要 `tsx`。
-5. 确定保存路径：优先使用项目已有 UI 自动化测试目录；没有时创建 `tests/ui-autotest/<业务域>/<用例名>.ts`。
+5. 确定保存路径：优先使用项目已有 UI 自动化测试目录；没有时创建 `tests/ui-autotest/<业务域>/<用例名>-<yymmdd>.ts`。
 6. 编写脚本：使用 `AndroidDevice` 连接设备，使用 `AndroidAgent` 执行视觉驱动操作。
 7. 加入稳定断言：关键页面使用 `aiWaitFor` 等待，再用 `aiAssert` 校验结果。
 8. 输出可诊断信息：必要时用 `aiQuery` 提取界面数据并打印。
@@ -48,13 +48,13 @@ description: 需要为 Android 应用新增或维护 MidsceneJS UI 自动化测�
 默认保存到：
 
 ```text
-tests/ui-autotest/<业务域>/<用例名>.ts
+tests/ui-autotest/<业务域>/<用例名>-<yymmdd>.ts
 ```
 
 路径规则：
 
 - `<业务域>` 使用英文 kebab-case，例如 `login`、`checkout`、`settings`。
-- `<用例名>` 使用英文 kebab-case，描述核心流程，例如 `login-with-password.ts`。
+- `<用例名>` 使用英文 kebab-case，描述核心流程，并追加当前日期 `yymmdd` 后缀，例如 `login-with-password-260517.ts`。
 - 如果项目已有 UI 自动化目录，优先沿用已有目录结构，例如 `e2e/`、`tests/e2e/`、`ui-tests/`。
 - 如果同一业务域有多个用例，把共享帮助函数放到 `tests/ui-autotest/<业务域>/helpers.ts`。
 - 不把临时调试脚本放进正式用例目录；临时脚本使用 `tmp/ui-autotest/`。
